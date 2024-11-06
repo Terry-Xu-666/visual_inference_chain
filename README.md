@@ -39,7 +39,6 @@ Our experiments consist of three main steps:
 #### 📥 Clone the Repository
 
 ```shell
-git clone https://github.com/Terry-Xu-666/VIC.git
 cd VIC
 ```
 
@@ -301,8 +300,8 @@ This command accepts the following arguments:
 
 ### 📜 Citation
 
-If you found our work useful, please consider starring and citing. Thank you!
+<!-- If you found our work useful, please consider starring and citing. Thank you!
 
 ```latex
 
-```
+``` -->
