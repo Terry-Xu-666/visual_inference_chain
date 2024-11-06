@@ -1,0 +1,43 @@
+model_config:
+  #open ai
+  service_provider : openai
+  model_name : gpt-4o-mini
+  #api_keys : optionally if you have openai api key stored in environment variable
+  
+  #azure
+  # service_provider : azure
+  # model_name : gpt4o-mini
+  # api_keys : abcd52ed75a14d5ab653de921d0b116a
+  # deployment_name : gpt4o-mini
+  # api_base : https://lair-lab-swedencentral.openai.azure.com
+  # api_version : 2024-02-15-preview
+  # organization : lair-lab-swedencentral
+
+  # Qwen
+  # service_provider: qwen
+  # model_name : qwen-vl-plus
+  # api_keys : optionally if you have qwen api key stored in environment variable
+  
+  #Claude
+  #service_provider : claude
+  # model_name : claude-3-5-sonnet-20240620
+  
+  #Gemini
+  # service_provider : gemini
+  # model_name : gemini-1.5-flash-001
+  
+
+  
+vic_api_config:
+  service_provider : openai
+  model_name : gpt-4o-mini
+
+  # service_provider : gemini
+  # model_name : gemini-1.5-flash
+  # service_provider : qwen
+  # model_name : qwen-max
+  
+eval_api_config:
+  #service_provider : openai
+  #model_name : gpt-4o-mini
+  
