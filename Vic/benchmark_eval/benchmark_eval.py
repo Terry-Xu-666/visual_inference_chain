@@ -1,18 +1,15 @@
-from openai import OpenAI
+
 import os
 from tqdm import tqdm
 import pandas as pd
 import re
 import ast
 import pandas as pd
-import regex
+
 from Levenshtein import distance
 from copy import deepcopy
-from collections import defaultdict
 from retry import retry
 from rich.console import Console
-import langfun as lf 
-import pyglove as pg
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix,f1_score
 
 from ..utils.file import import_file
@@ -610,72 +607,7 @@ class Pope_eval(benchmark_eval):
         return y_true, y_pred
         
 
-class MMbench_eval(benchmark_eval):
-    
-    def __init__(self,data,path):
-        super().__init__(data,path)
-        self.type = 'MCQ'
-        
-    def find_response(self):
-        response_column = [col for col in self.df.columns if 'response' in col and 'intermediate' not in col]
-        return self.df[response_column].squeeze().tolist()
-    
-    def find_answer(self):
-        answer_list = self.df['answer'].tolist()
-        answer_list = [f'({ans.lower()})' for ans in answer_list]
-        return answer_list
-    
-    def find_choice(self,index):
-        return self.df.loc[index,'choices']
-    
-    def MCQ(self,response,answer,under_eval_bench,index):
-        
-        prompt = "Please read the user's response to a multiple-choice question. Your task is to identify and output the lower letter with parentheses (a), (b),(c),(d) etc. that corresponds to the option chosen by the response. If the response does not clearly indicate a choice or no option is mentioned, output 'unclear'. Only output a single letter or 'unclear'."
-        
-        choice = under_eval_bench.find_choice(index)
-        
-        response = f"Choises:{choice}\nResponse:{response}"
-        # response = f"Response:{response}"
-        
-        LLM_parse = self.LLM(response,prompt)
-        # print(LLM_parse)
-        
-        sign = self.extract_answer(LLM_parse,answer)
-            
-        return LLM_parse,sign
-    
-    def extract_answer(self, LLM_parse, answer):
-        if answer in LLM_parse.lower():
-            return 1
-        else:
-            return 0
-        
-    def score(self):
-        
-        # Load the evaluation results
-        eval_results = import_file(self.result_path)
-        
-        # Initialize the score dictionaries
-        MMbench_score = {'total':len(eval_results)}
-        MMbench_score['correct'] = eval_results['sign'].sum()
-        MMbench_score['accuracy'] = MMbench_score['correct']/MMbench_score['total']
-        
-        #fine-grained evaluation
-        category = eval_results.groupby('category').apply(lambda x: x['sign'].sum()/len(x))
-        category = category.to_dict()
-        MMbench_score.update(category)
-        
-        l2_category = eval_results.groupby('l2-category').apply(lambda x: x['sign'].sum()/len(x))
-        l2_category = l2_category.to_dict()
-        MMbench_score.update(l2_category)
-        
-        # Print and save the scores
-        MMbench_score_df = pd.DataFrame([MMbench_score])
-        MMbench_score_df.to_excel(self.score_name, index=False)
-        
-        for key, value in MMbench_score.items():
-            print(f'{key}: {value:.4f}'+ '\n')
-            
+
 class Seed_bench_eval(benchmark_eval):
     
     def __init__(self,data,path):
@@ -739,10 +671,148 @@ class Seed_bench_eval(benchmark_eval):
         for key, value in seed_bench_score.items():
             print(f'{key}: {value:.4f}'+ '\n')
             
+class mathvista_eval(benchmark_eval):
+    
+    def __init__(self, data, path):
+        super().__init__(data, path)
+        self.type = 'MIX'
+    
+    def find_response(self):
+        # you must rewrite this function to find the response in your data and return it as a list
+        response_column = [col for col in self.df.columns if 'response' in col and 'intermediate' not in col]
+        return self.df[response_column].squeeze().tolist()
+    
+    def find_answer(self):
+        answer_list = []
+        
+        options = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O']
+        
+        for i in range(len(self)):
+            if self.df['question_type'][i] == 'multi_choice':
+                answer = self.df['answer'][i]
+                distance_list = [distance(answer,choice) for choice in ast.literal_eval(self.df['choices'][i])]
+                distance_index = distance_list.index(min(distance_list))
+                answer_list.append(options[distance_index])
+            else:
+                answer_list.append(self.df['answer'][i])
+                
+        assert len(answer_list) == len(self)
+        return answer_list
+    
+    def find_choice(self,under_eval_bench,index):
+        choices = ast.literal_eval(under_eval_bench.df['choices'][index])
+        options = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O']
+        choice = ''
+        for i in range(len(choices)):
+            choice += options[i]+'. '+choices[i]+'\n'
+        return choice
+            
+    
+    
+    def MIX(self, response, answer, under_eval_bench, index):
+        
+        if under_eval_bench.df['question_type'][index] == 'multi_choice':
+            
+            LLM_parse,sign = self.MCQ(response,answer,under_eval_bench,index)
+            
+        else:
+            LLM_parse,sign = self.number(response,answer)
+            
+        return LLM_parse,sign
+        
+                
+    
+    def score(self):
+        # Load the evaluation results
+        eval_results = import_file(self.result_path)
+        
+        # Initialize the score dictionaries
+        mathvista_score = {'total':len(eval_results)}
+        mathvista_score['correct'] = eval_results['sign'].sum()
+        mathvista_score['accuracy'] = mathvista_score['correct']/mathvista_score['total']
+        
+        skills = []
+        
+        for i in range(len(eval_results)):
+            mata_data = ast.literal_eval(eval_results['metadata'][i])
+            skill = mata_data['skills']
+            skills.extend(skill)
+        skills = list(set(skills))
+        
+        for skill in skills:
+            df =eval_results[eval_results['metadata'].apply(lambda x: skill in ast.literal_eval(x)['skills'])]
+            skill_score = df['sign'].sum()
+            skill_total = len(df)
+            mathvista_score[skill] = skill_score/skill_total
+        
+        # Print and save the scores
+        mathvista_score_df = pd.DataFrame([mathvista_score])
+        mathvista_score_df.to_excel(self.score_name, index=False)
+            
     
         
         
         
+class MMVP_eval(benchmark_eval):
+    
+    def __init__(self,data,path):
+        super().__init__(data,path)
+        self.type = 'MCQ'
+        
+    def find_response(self):
+        response_column = [col for col in self.df.columns if 'response' in col and 'intermediate' not in col]
+        return self.df[response_column].squeeze().tolist()
+    
+    def find_answer(self):
+        answer_list = self.df['Correct Answer'].tolist()
+            
+        return answer_list 
+    
+    def find_choice(self,index) -> str:
+        return self.df.loc[index,'Options']
+    
+    def MCQ(self, response, answer, under_eval_bench, index):
+        
+        prompt = "Please read the user's response to a multiple-choice question. Your task is to identify and output the lower letter with parentheses (a), (b), etc. that corresponds to the option chosen by the response. If the response does not clearly indicate a choice or no option is mentioned, output 'unclear'. Only output a single letter or 'unclear'."
+        
+        choice = under_eval_bench.find_choice(index)
+        
+        response = f"Choises:{choice}\nResponse:{response}"
+        # response = f"Response:{response}"
+        
+        LLM_parse = self.LLM(response,prompt)
+        # print(LLM_parse)
+        
+        sign = self.extract_answer(LLM_parse,answer)
+            
+        return LLM_parse,sign
+    
+    def extract_answer(self, LLM_parse, answer):
+        if answer in LLM_parse.lower():
+            return 1
+        else:
+            return 0
+        
+    def score(self):
+        # Load the evaluation results
+        eval_results = import_file(self.result_path)
+        
+        # Initialize the score dictionaries
+        MMVP_score = {'total':len(eval_results)/2}
+        correct = 0
+        for i in range(0,len(eval_results),2):
+            if eval_results['sign'][i] == 1 and eval_results['sign'][i+1] == 1:
+                correct += 1
+        MMVP_score['correct'] = correct
+        MMVP_score['accuracy'] = MMVP_score['correct']/MMVP_score['total']
+        
+        #save the scores to excel
+        MMVP_score_df = pd.DataFrame([MMVP_score])
+        MMVP_score_df.to_excel(self.score_name, index=False)
+        
+        #print the scores
+        for key, value in MMVP_score.items():
+            print(f'{key}: {value:.4f}')
         
         
 

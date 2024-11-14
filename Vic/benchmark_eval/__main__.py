@@ -32,30 +32,14 @@ for file in file_list:
     match args.bench:
         case 'hallubench':
             evaluator = Hallucination_eval.from_tsv(file)
-        case 'MMStar':
-            evaluator = MMStar_eval.from_tsv(file)
         case 'mathvista':
             evaluator = mathvista_eval.from_tsv(file)
-        case 'OCRBench':
-            evaluator = OCRBench_eval.from_tsv(file)
-        case 'contextual':
-            evaluator = contextual_eval.from_tsv(file)
         case 'MME':
             evaluator = MME_eval.from_tsv(file)
-        case 'haloquest':
-            evaluator = haloquest_eval.from_tsv(file)
         case 'mmvp':
             evaluator = MMVP_eval.from_tsv(file)
-        case 'cvbench':
-            evaluator = CVbench_eval.from_tsv(file)
-        case 'hqh':
-            evaluator = HQHbench_eval.from_tsv(file)
         case 'pope':
             evaluator = Pope_eval.from_tsv(file)
-        case 'mmvet':
-            evaluator = MMvet_eval.from_tsv(file)
-        case 'mmbench' :
-            evaluator = MMbench_eval.from_tsv(file)
         case 'seed':
             evaluator = Seed_bench_eval.from_tsv(file)
     # evaluator.score()

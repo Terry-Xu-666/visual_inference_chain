@@ -38,6 +38,6 @@ vic_api_config:
   # model_name : qwen-max
   
 eval_api_config:
-  #service_provider : openai
-  #model_name : gpt-4o-mini
+  service_provider : openai
+  model_name : gpt-4o-mini
   

@@ -1,7 +1,7 @@
 
-# 🌌 **Thinking Before Looking:** Are Visual Elements the Key to Shaping Reasoning Trajectory in MLLM?
+# 🌌 **Thinking Before Looking:** Reducing Visual Biases in Multimodal Reasoning?
 
-✨ This repository contains the official code for our paper: **_Thinking Before Looking: Are Visual Elements the Key to Shaping Reasoning Trajectory in MLLM?_**  
+✨ This repository contains the official code for our paper: **_Thinking Before Looking: Reducing Visual Biases in Multimodal Reasoning_**  
 📜 For more details and discussions, please refer to the full paper available [here]().
 
 ---
@@ -121,7 +121,7 @@ Ensure that your input file meets the requirements of `visual_benchmark`. Your d
 You can optionally generate a Visual Inference Chain (VIC) for each question in your benchmark before running the test.
 
 ```shell
-python -m Vic.benchmark -p <path_to_benchmark>
+python -m Vic.benchmark_tool -p <path_to_benchmark>
 ```
 
 This command will generate a VIC for each question in the benchmark file.
@@ -131,7 +131,7 @@ This command will generate a VIC for each question in the benchmark file.
 To run the benchmark test, use the following command:
 
 ```shell
-python -m Vic.benchmark.test
+python -m Vic.benchmark_test
 ```
 
 This command requires several arguments:
