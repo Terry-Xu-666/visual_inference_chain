@@ -36,13 +36,29 @@ Our experiments consist of three main steps:
 
 ### 🚀 Quick Start
 
+Here's a refined version of your README with corrections and improvements for clarity and formatting:
+
+---
+
 #### 📥 Clone the Repository
 
+First, clone the repository and navigate into the project directory:
+
 ```shell
+git clone <repository-url>
 cd VIC
 ```
 
+### 📦 Install Dependencies
+
+To install the required dependencies, use the following command:
+
+```shell
+pip install -r requirements.txt
+```
+
 ### ⚙️ Configuration
+
 
 We provide an interface compatible with most mainstream AI models that offer APIs and can be adapted to our methods. Proper configuration is essential. You can choose among 🌐 Microsoft Azure, 🧠 OpenAI, 🐉 Qwen, 🪄 Gemini, and 🤖 Claude. Both setting environmental variables or adding API keys directly in `config.yaml` are acceptable.
 
