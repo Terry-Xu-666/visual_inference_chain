@@ -215,13 +215,8 @@ support bench:
 - `Seed-Bench`
 - `Mathvista`
 - `POPE`
-- MMVP
+- `MMVP`
 
-###citations
-
-if you like our works, just give
-
-Here's an optimized version of the section:
 
 ---
 
