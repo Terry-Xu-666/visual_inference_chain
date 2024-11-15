@@ -1,7 +1,7 @@
 
-# 🌌 **Thinking Before Looking:** Reducing Visual Biases in Multimodal Reasoning?
+# 🌌 **Thinking Before Looking:** Improving Multimodal LLM Reasoning via Mitigating Visual Hallucination
 
-✨ This repository contains the official code for our paper: **_Thinking Before Looking: Reducing Visual Biases in Multimodal Reasoning_**  
+✨ This repository contains the official code for our paper: **_Thinking Before Looking: Improving Multimodal LLM Reasoning via Mitigating Visual Hallucination_**  
 📜 For more details and discussions, please refer to the full paper available [here]().
 
 ---
